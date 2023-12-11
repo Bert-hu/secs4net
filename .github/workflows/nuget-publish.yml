@@ -30,7 +30,7 @@ jobs:
       #run: dotnet pack -c Release 
       run: |
          cd .\src\Secs4Net
-         dotnet pack Wlkr.Core.Logger.csproj  --configuration Release --no-build
+         dotnet pack Secs4Net.csproj  --configuration Release --no-build
     - name: Push
       #run: dotnet nuget push "**/*.nupkg" --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
       run: dotnet nuget push **/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
