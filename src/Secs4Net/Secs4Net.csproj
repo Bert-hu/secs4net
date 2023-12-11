@@ -7,6 +7,7 @@
 		<IsTrimmable>false</IsTrimmable>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <LangVersion>10.0</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
