@@ -352,6 +352,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
                 {
                     return;
                 }
+
                 _isretrying = true;
                 Disconnect();
                 Start(_stoppingToken);
