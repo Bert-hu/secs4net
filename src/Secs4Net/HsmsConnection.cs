@@ -71,6 +71,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
     private readonly Timer _timerLinkTest;
     private readonly ConcurrentDictionary<int, ValueTaskCompletionSource<MessageType>> _replyExpectedMsgs = new();
     private readonly int _socketReceiveBufferSize;
+    private bool _isretrying = false;
 #if NETSTANDARD
     private readonly byte[] _socketReceiveBuffer;
 #endif
@@ -158,6 +159,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
                         _socket = socket;
                         CommunicationStateChanging(ConnectionState.Connected);
                         connected = true;
+                        _isretrying = false;
                     }
                     catch (Exception ex) when (!IsDisposed)
                     {
@@ -203,6 +205,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
                         _socket.ReceiveBufferSize = _socketReceiveBufferSize;
                         CommunicationStateChanging(ConnectionState.Connected);
                         connected = true;
+                        _isretrying = false;
                     }
                     catch (Exception ex) when (!IsDisposed)
                     {
@@ -345,11 +348,11 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
 #endif
                 break;
             case ConnectionState.Retry:
-                if (IsDisposed)
+                if (IsDisposed || _isretrying)
                 {
                     return;
                 }
-
+                _isretrying = true;
                 Disconnect();
                 Start(_stoppingToken);
                 break;

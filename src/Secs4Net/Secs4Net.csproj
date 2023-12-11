@@ -6,6 +6,7 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<IsTrimmable>false</IsTrimmable>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
