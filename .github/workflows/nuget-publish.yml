@@ -27,14 +27,15 @@ jobs:
     # - name: Test
     #   run: dotnet test --no-build --verbosity normal
     - name: Pack
-      #run: dotnet pack -c Release 
-      run: |
-         cd "/home/runner/work/secs4net/secs4net/src/Secs4Net"
-         dotnet pack Secs4Net.csproj  --configuration Release --no-build
+      run: dotnet pack src/Secs4Net/Secs4Net.csproj -c Release --no-build
+      # run: |
+      #    cd "/home/runner/work/secs4net/secs4net/src/Secs4Net"
+      #    dotnet pack Secs4Net.csproj  --configuration Release --no-build
     - name: Push
       #run: dotnet nuget push "**/*.nupkg" --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
       #run: dotnet nuget push **/*.nupkg --api-key oy2d3s6o65yyihl6ea4aghaeygfpp26exnw6wrquxi4jny --source https://api.nuget.org/v3/index.json --skip-duplicate
-      uses: brandedoutcast/publish-nuget@v2.5.5
-      with:
-        PROJECT_FILE_PATH: src/Secs4Net/Secs4Net.csproj
-        NUGET_KEY: oy2kozcjc63rc5ge2vpanxmno5wvjc6udcplzbmf47e6f4
+      run: dotnet nuget push src/Secs4Net/bin/Release/*.nupkg -k $NUGET_KEY -s https://api.nuget.org/v3/index.json
+      # uses: brandedoutcast/publish-nuget@v2.5.5
+      # with:
+      #   PROJECT_FILE_PATH: src/Secs4Net/Secs4Net.csproj
+      #   NUGET_KEY: oy2kozcjc63rc5ge2vpanxmno5wvjc6udcplzbmf47e6f4
