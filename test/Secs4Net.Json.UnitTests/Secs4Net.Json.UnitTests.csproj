@@ -27,6 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Secs4Net.Json\Secs4Net.Json.csproj" />
+    <ProjectReference Include="..\..\src\Secs4Net.Json\Secs4Net.Json.Bert.csproj" />
   </ItemGroup>
 </Project>

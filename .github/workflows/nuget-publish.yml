@@ -34,3 +34,7 @@ jobs:
       run: dotnet pack src/Secs4Net.Sml/Secs4Net.Sml.Bert.csproj -c Release --no-build
     - name: Push Secs4Net.Sml.Bert
       run: dotnet nuget push src/Secs4Net.Sml/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    - name: Pack Secs4Net.Json.Bert
+      run: dotnet pack src/Secs4Net.Json/Secs4Net.Json.Bert.csproj -c Release --no-build
+    - name: Push Secs4Net.Json.Bert
+      run: dotnet nuget push src/Secs4Net.Json/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
