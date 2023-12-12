@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Secs4Net\Secs4Net.csproj" />
+    <ProjectReference Include="..\Secs4Net\MySecs4Net.csproj" />
   </ItemGroup>
 
 </Project>
