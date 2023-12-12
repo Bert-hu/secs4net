@@ -26,15 +26,15 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     # - name: Test
     #   run: dotnet test --no-build --verbosity normal
-    - name: Pack Secs4Net.Bert
-      run: dotnet pack src/Secs4Net/Secs4Net.Bert.csproj -c Release --no-build
-    - name: Push Secs4Net.Bert
+    - name: Pack Secs.Bert
+      run: dotnet pack src/Secs4Net/Secs.Bert.csproj -c Release --no-build
+    - name: Push Secs.Bert
       run: dotnet nuget push src/Secs4Net/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-    - name: Pack Secs4Net.Sml.Bert
-      run: dotnet pack src/Secs4Net.Sml/Secs4Net.Sml.Bert.csproj -c Release --no-build
-    - name: Push Secs4Net.Sml.Bert
+    - name: Pack Secs.Sml.Bert
+      run: dotnet pack src/Secs4Net.Sml/Secs.Sml.Bert.csproj -c Release --no-build
+    - name: Push Secs.Sml.Bert
       run: dotnet nuget push src/Secs4Net.Sml/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-    - name: Pack Secs4Net.Json.Bert
-      run: dotnet pack src/Secs4Net.Json/Secs4Net.Json.Bert.csproj -c Release --no-build
-    - name: Push Secs4Net.Json.Bert
+    - name: Pack Secs.Json.Bert
+      run: dotnet pack src/Secs4Net.Json/Secs.Json.Bert.csproj -c Release --no-build
+    - name: Push Secs.Json.Bert
       run: dotnet nuget push src/Secs4Net.Json/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json

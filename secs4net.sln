@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31512.422
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{47372419-BB0F-4D47-A9A9-F93EE7551CB9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs4Net.Bert", "src\Secs4Net\Secs4Net.Bert.csproj", "{3C8C67B8-3746-4D26-B3A8-DCB01B5AA66B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs.Bert", "src\Secs4Net\Secs.Bert.csproj", "{3C8C67B8-3746-4D26-B3A8-DCB01B5AA66B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FA43F666-4A13-4BD8-95FE-B8277E33D486}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,9 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{951A32A6-C9EA-43A8-A9B2-4427D5B39A51}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs4Net.Sml.Bert", "src\Secs4Net.Sml\Secs4Net.Sml.Bert.csproj", "{E6CF4F24-6C30-4D95-8C6B-631DD7AE4749}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs.Sml.Bert", "src\Secs4Net.Sml\Secs.Sml.Bert.csproj", "{E6CF4F24-6C30-4D95-8C6B-631DD7AE4749}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs4Net.Json.Bert", "src\Secs4Net.Json\Secs4Net.Json.Bert.csproj", "{8BD6FE5E-742F-45BF-AA10-8007799A46B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs.Json.Bert", "src\Secs4Net.Json\Secs.Json.Bert.csproj", "{8BD6FE5E-742F-45BF-AA10-8007799A46B9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Secs4Net.UnitTests", "test\Secs4Net.UnitTests\Secs4Net.UnitTests.csproj", "{6E075D59-153E-4C22-9851-CE62F9844D49}"
 EndProject

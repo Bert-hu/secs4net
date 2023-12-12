@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Secs4Net\Secs4Net.Bert.csproj" />
+    <ProjectReference Include="..\..\src\Secs4Net\Secs.Bert.csproj" />
   </ItemGroup>
   
   <ItemGroup>

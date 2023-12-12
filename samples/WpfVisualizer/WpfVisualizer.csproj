@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Secs4Net\Secs4Net.Bert.csproj" />
-    <ProjectReference Include="..\..\src\Secs4Net.Json\Secs4Net.Json.Bert.csproj" />
+    <ProjectReference Include="..\..\src\Secs4Net\Secs.Bert.csproj" />
+    <ProjectReference Include="..\..\src\Secs4Net.Json\Secs.Json.Bert.csproj" />
   </ItemGroup>
 
   <ItemGroup>
