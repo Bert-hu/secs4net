@@ -14,7 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <ProjectReference Include="..\Secs4Net\MySecs4Net.csproj" />
+    <ProjectReference Include="..\Secs4Net\Secs4Net.Bert.csproj" />
   </ItemGroup>
 
 </Project>
