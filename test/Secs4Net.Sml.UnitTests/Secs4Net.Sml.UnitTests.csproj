@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Secs4Net.Sml\Secs4Net.Sml.csproj" />
+    <ProjectReference Include="..\..\src\Secs4Net.Sml\Secs4Net.Sml.Bert.csproj" />
   </ItemGroup>
 
   <ItemGroup>

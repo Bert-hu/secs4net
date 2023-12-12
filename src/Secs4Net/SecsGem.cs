@@ -31,7 +31,7 @@ public sealed class SecsGem : ISecsGem, IDisposable
     private const int DisposalComplete = 1;
     private int _disposeStage;
     private readonly ISecsGemLogger _logger;
-    private readonly ISecsConnection _hsmsConnector;
+    public readonly ISecsConnection _hsmsConnector;
 
     public ushort DeviceId { get; }
     public int T3 { get; }
