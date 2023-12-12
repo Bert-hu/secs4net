@@ -28,13 +28,9 @@ jobs:
     #   run: dotnet test --no-build --verbosity normal
     - name: Pack Secs4Net.Bert
       run: dotnet pack src/Secs4Net/Secs4Net.Bert.csproj -c Release --no-build
-      working-directory: ./src/Secs4Net
     - name: Push Secs4Net.Bert
       run: dotnet nuget push src/Secs4Net/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-      working-directory: ./src/Secs4Net
     - name: Pack Secs4Net.Sml.Bert
       run: dotnet pack src/Secs4Net.Sml/Secs4Net.Sml.Bert.csproj -c Release --no-build
-      working-directory: ./src/Secs4Net.Sml
     - name: Push Secs4Net.Sml.Bert
       run: dotnet nuget push src/Secs4Net.Sml/bin/Release/*.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-      working-directory: ./src/Secs4Net.Sml
