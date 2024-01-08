@@ -1,6 +1,7 @@
 # secs4net
 
-[![.NET](https://github.com/mkjeff/secs4net/actions/workflows/dotnet.yml/badge.svg)](https://github.com/mkjeff/secs4net/actions/workflows/dotnet.yml) [![Nuget](https://img.shields.io/nuget/dt/secs4net)](https://www.nuget.org/stats/packages/Secs4Net?groupby=Version) [![NuGet](https://img.shields.io/nuget/v/secs4net.svg)](https://www.nuget.org/packages/Secs4Net) [![codecov](https://codecov.io/gh/mkjeff/secs4net/graph/badge.svg?token=AgiQxizSvE)](https://codecov.io/gh/mkjeff/secs4net)
+   > This project is an improvement version from `mkjeff/secs4net`, which has only optimized some functions and is only for personal learning and use. If you have any questions, please contact me.<br/>
+   <hubo611@foxmail.com>
 
 **Project Description**  
 
@@ -173,3 +174,5 @@ using var s6f12 = await secsGem.SendAsync(s6f11);
    
    > Since the length of the max encoded bytes in a single non-List Item was `16,777,215`(3 bytes), we split raw data into separated items.
     In that case, creating the Items from sliced `Memory<T>` is more efficient.
+
+
