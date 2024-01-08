@@ -6,7 +6,7 @@
     <IsPackable>false</IsPackable>
 	<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <UserSecretsId>dotnet-DeviceWorkerService-D257E021-F238-499C-8ACD-858186E73C0A</UserSecretsId>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
