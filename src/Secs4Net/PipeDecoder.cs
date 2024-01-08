@@ -124,7 +124,7 @@ public sealed class PipeDecoder
                 buffer = await PipeReadAsync(reader, required: itemContentLengthByteCount, cancellation).ConfigureAwait(false);
             }
             var itemContentLengthBytes = buffer.Slice(0, itemContentLengthByteCount);
-            Item.DecodeDataLength(itemContentLengthBytes, out var itemContentLength);
+            var itemContentLength = Item.DecodeDataLength(itemContentLengthBytes);
             buffer = buffer.Slice(itemContentLengthBytes.End);
 
             // 4: get item content
@@ -196,7 +196,6 @@ public sealed class PipeDecoder
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [SkipLocalsInit]
     private static bool IsBufferInsufficient(PipeReader reader, ref ReadOnlySequence<byte> remainedBuffer, int required)
     {
         if (remainedBuffer.Length >= required)
@@ -209,7 +208,6 @@ public sealed class PipeDecoder
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [SkipLocalsInit]
     private static bool PipeTryRead(PipeReader reader, int required, ref ReadOnlySequence<byte> buffer)
     {
         if (reader.TryRead(out var result))
@@ -262,14 +260,13 @@ public sealed class PipeDecoder
         }
     }
 
-    private sealed class ItemList
+    private sealed class ItemList(int size)
     {
-        private readonly Item[] _items;
+        private readonly Item[] _items = new Item[size];
 
         public int Capacity => _items.Length;
         public int Count { get; private set; }
 
-        public ItemList(int size) => _items = new Item[size];
         public void Add(Item item) => _items.DangerousGetReferenceAt(Count++) = item;
         public Item[] GetArray() => _items;
     }

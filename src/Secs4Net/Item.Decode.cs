@@ -29,12 +29,13 @@ public partial class Item
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SkipLocalsInit]
-    internal static void DecodeDataLength(in ReadOnlySequence<byte> sourceBytes, out int dataLength)
+    internal static int DecodeDataLength(in ReadOnlySequence<byte> sourceBytes)
     {
-        dataLength = 0;
+        var dataLength = 0;
         var lengthBytes = dataLength.AsBytes();
         sourceBytes.CopyTo(lengthBytes);
         lengthBytes[..(int)sourceBytes.Length].Reverse();
+        return dataLength;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -43,9 +44,9 @@ public partial class Item
     {
         var formatSeq = bytes.Slice(0, 1);
         DecodeFormatAndLengthByteCount(formatSeq, out var format, out var lengthByteCount);
-        
+
         var dataLengthSeq = bytes.Slice(formatSeq.End, lengthByteCount);
-        DecodeDataLength(dataLengthSeq, out var dataLength);
+        var dataLength = DecodeDataLength(dataLengthSeq);
         bytes = bytes.Slice(dataLengthSeq.End);
 
         if (format == SecsFormat.List)
@@ -56,9 +57,9 @@ public partial class Item
             }
 
             var items = new Item[dataLength];
-            for (var i = 0; i < items.Length; i++)
+            foreach (ref var subItem in items.AsSpan())
             {
-                items.DangerousGetReferenceAt(i) = DecodeFromFullBuffer(ref bytes);
+                subItem = DecodeFromFullBuffer(ref bytes);
             }
 
             return L(items);
@@ -70,395 +71,103 @@ public partial class Item
         return item;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Item DecodeDataItem(SecsFormat format, in ReadOnlySequence<byte> bytes)
     {
-        return format switch
+        var length = (int)bytes.Length;
+        return (format, length) switch
         {
-            SecsFormat.Binary => DecodeBinary(bytes),
-            SecsFormat.Boolean => DecodeBoolean(bytes),
-            SecsFormat.ASCII => DecodeASCII(bytes),
-            SecsFormat.JIS8 => DecodeJIS8(bytes),
-            SecsFormat.I8 => DecodeI8(bytes),
-            SecsFormat.I1 => DecodeI1(bytes),
-            SecsFormat.I2 => DecodeI2(bytes),
-            SecsFormat.I4 => DecodeI4(bytes),
-            SecsFormat.F8 => DecodeF8(bytes),
-            SecsFormat.F4 => DecodeF4(bytes),
-            SecsFormat.U8 => DecodeU8(bytes),
-            SecsFormat.U1 => DecodeU1(bytes),
-            SecsFormat.U2 => DecodeU2(bytes),
-            SecsFormat.U4 => DecodeU4(bytes),
+            (SecsFormat.ASCII, 0) => A(),
+            (SecsFormat.ASCII, >= 512) => DecodeLazyStringItem(SecsFormat.ASCII, length, bytes),
+            (SecsFormat.ASCII, _) => A(DecodeString(length, bytes, Encoding.ASCII)),
+
+            (SecsFormat.JIS8, 0) => J(),
+            (SecsFormat.JIS8, >= 512) => DecodeLazyStringItem(SecsFormat.JIS8, length, bytes),
+            (SecsFormat.JIS8, _) => J(DecodeString(length, bytes, JIS8Encoding)),
+
+            (SecsFormat.Binary, 0) => B(),
+            (SecsFormat.Binary, >= 1024) => B(DecodeMemoryOwner<byte>(length, bytes)),
+            (SecsFormat.Binary, _) => B(DecodeMemory<byte>(length, bytes)),
+
+            (SecsFormat.Boolean, 0) => Boolean(),
+            (SecsFormat.Boolean, >= 1024) => Boolean(DecodeMemoryOwner<bool>(length, bytes)),
+            (SecsFormat.Boolean, _) => Boolean(DecodeMemory<bool>(length, bytes)),
+
+            (SecsFormat.I8, 0) => I8(),
+            (SecsFormat.I8, >= 1024) => I8(DecodeMemoryOwner<long>(length, bytes)),
+            (SecsFormat.I8, _) => I8(DecodeMemory<long>(length, bytes)),
+
+            (SecsFormat.I1, 0) => I1(),
+            (SecsFormat.I1, >= 1024) => I1(DecodeMemoryOwner<sbyte>(length, bytes)),
+            (SecsFormat.I1, _) => I1(DecodeMemory<sbyte>(length, bytes)),
+
+            (SecsFormat.I2, 0) => I2(),
+            (SecsFormat.I2, >= 1024) => I2(DecodeMemoryOwner<short>(length, bytes)),
+            (SecsFormat.I2, _) => I2(DecodeMemory<short>(length, bytes)),
+
+            (SecsFormat.I4, 0) => I4(),
+            (SecsFormat.I4, >= 1024) => I4(DecodeMemoryOwner<int>(length, bytes)),
+            (SecsFormat.I4, _) => I4(DecodeMemory<int>(length, bytes)),
+
+            (SecsFormat.F8, 0) => F8(),
+            (SecsFormat.F8, >= 1024) => F8(DecodeMemoryOwner<double>(length, bytes)),
+            (SecsFormat.F8, _) => F8(DecodeMemory<double>(length, bytes)),
+
+            (SecsFormat.F4, 0) => F4(),
+            (SecsFormat.F4, >= 1024) => F4(DecodeMemoryOwner<float>(length, bytes)),
+            (SecsFormat.F4, _) => F4(DecodeMemory<float>(length, bytes)),
+
+            (SecsFormat.U8, 0) => U8(),
+            (SecsFormat.U8, >= 1024) => U8(DecodeMemoryOwner<ulong>(length, bytes)),
+            (SecsFormat.U8, _) => U8(DecodeMemory<ulong>(length, bytes)),
+
+            (SecsFormat.U1, 0) => U1(),
+            (SecsFormat.U1, >= 1024) => U1(DecodeMemoryOwner<byte>(length, bytes)),
+            (SecsFormat.U1, _) => U1(DecodeMemory<byte>(length, bytes)),
+
+            (SecsFormat.U2, 0) => U2(),
+            (SecsFormat.U2, >= 1024) => U2(DecodeMemoryOwner<ushort>(length, bytes)),
+            (SecsFormat.U2, _) => U2(DecodeMemory<ushort>(length, bytes)),
+
+            (SecsFormat.U4, 0) => U4(),
+            (SecsFormat.U4, >= 1024) => U4(DecodeMemoryOwner<uint>(length, bytes)),
+            (SecsFormat.U4, _) => U4(DecodeMemory<uint>(length, bytes)),
             _ => ThrowHelper(),
         };
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SkipLocalsInit]
-        static Item DecodeASCII(in ReadOnlySequence<byte> bytes)
+        static string DecodeString(int length, in ReadOnlySequence<byte> bytes, Encoding encoding)
         {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return A();
-                case >= 512:
-                    {
-                        var owner = MemoryOwner<byte>.Allocate(length);
-                        bytes.CopyTo(owner.Memory.Span);
-                        return new LazyStringItem(SecsFormat.ASCII, owner);
-                    }
-                default:
-                    {
-                        using var spanOwner = SpanOwner<byte>.Allocate(length);
-                        bytes.CopyTo(spanOwner.Span);
-                        return A(StringPool.Shared.GetOrAdd(spanOwner.Span, Encoding.ASCII));
-                    }
-            }
+            using var spanOwner = SpanOwner<byte>.Allocate(length);
+            bytes.CopyTo(spanOwner.Span);
+            return StringPool.Shared.GetOrAdd(spanOwner.Span, encoding);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SkipLocalsInit]
-        static Item DecodeJIS8(in ReadOnlySequence<byte> bytes)
+        static Item DecodeLazyStringItem(SecsFormat format, int length, in ReadOnlySequence<byte> bytes)
         {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return J();
-                case >= 512:
-                    {
-                        var owner = MemoryOwner<byte>.Allocate(length);
-                        bytes.CopyTo(owner.Memory.Span);
-                        return new LazyStringItem(SecsFormat.JIS8, owner);
-                    }
-                default:
-                    {
-                        using var spanOwner = SpanOwner<byte>.Allocate(length);
-                        bytes.CopyTo(spanOwner.Span);
-                        return J(StringPool.Shared.GetOrAdd(spanOwner.Span, Jis8Encoding));
-                    }
-            }
+            var owner = MemoryOwner<byte>.Allocate(length);
+            bytes.CopyTo(owner.Memory.Span);
+            return new LazyStringItem(format, owner);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SkipLocalsInit]
-        static Item DecodeBoolean(in ReadOnlySequence<byte> bytes)
+        static unsafe Memory<T> DecodeMemory<T>(int length, in ReadOnlySequence<byte> bytes) where T : unmanaged, IEquatable<T>
         {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return Boolean();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<bool>.Allocate(length);
-                        bytes.CopyTo(owner.Span.AsBytes());
-                        return Boolean(owner);
-                    }
-                default:
-                    {
-                        Memory<bool> memory = new bool[length];
-                        bytes.CopyTo(memory.Span.AsBytes());
-                        return Boolean(memory);
-                    }
-            }
+            var memory = new T[length / sizeof(T)];
+            var span = memory.AsSpan();
+            bytes.CopyTo(span.AsBytes());
+            ReverseEndiannessHelper<T>.Reverse(span);
+            return memory;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [SkipLocalsInit]
-        static Item DecodeBinary(in ReadOnlySequence<byte> bytes)
+        static unsafe IMemoryOwner<T> DecodeMemoryOwner<T>(int length, in ReadOnlySequence<byte> bytes) where T : unmanaged, IEquatable<T>
         {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return B();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<byte>.Allocate(length);
-                        bytes.CopyTo(owner.Span);
-                        return B(owner);
-                    }
-                default:
-                    {
-                        Memory<byte> memory = new byte[length];
-                        bytes.CopyTo(memory.Span.AsBytes());
-                        return B(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeU1(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return U1();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<byte>.Allocate(length);
-                        bytes.CopyTo(owner.Span);
-                        return U1(owner);
-                    }
-                default:
-                    {
-                        Memory<byte> memory = new byte[length];
-                        bytes.CopyTo(memory.Span.AsBytes());
-                        return U1(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeU2(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return U2();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<ushort>.Allocate(length / sizeof(ushort));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U2(owner);
-                    }
-                default:
-                    {
-                        Memory<ushort> memory = new ushort[length / sizeof(ushort)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U2(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeU4(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return U4();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<uint>.Allocate(length / sizeof(uint));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U4(owner);
-                    }
-                default:
-                    {
-                        Memory<uint> memory = new uint[length / sizeof(uint)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U4(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeU8(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return U8();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<ulong>.Allocate(length / sizeof(ulong));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U8(owner);
-                    }
-                default:
-                    {
-                        Memory<ulong> memory = new ulong[length / sizeof(ulong)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return U8(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeI1(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return I1();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<sbyte>.Allocate(length);
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        return I1(owner);
-                    }
-                default:
-                    {
-                        Memory<sbyte> memory = new sbyte[length];
-                        bytes.CopyTo(memory.Span.AsBytes());
-                        return I1(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeI2(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return I2();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<short>.Allocate(length / sizeof(short));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I2(owner);
-                    }
-                default:
-                    {
-                        Memory<short> memory = new short[length / sizeof(short)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I2(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeI4(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return I4();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<int>.Allocate(length / sizeof(int));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I4(owner);
-                    }
-                default:
-                    {
-                        Memory<int> memory = new int[length / sizeof(int)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I4(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SkipLocalsInit]
-        static Item DecodeI8(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return I8();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<long>.Allocate(length / sizeof(long));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I8(owner);
-                    }
-                default:
-                    {
-                        Memory<long> memory = new long[length / sizeof(long)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return I8(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [SkipLocalsInit]
-        static Item DecodeF4(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return F4();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<float>.Allocate(length / sizeof(float));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return F4(owner);
-                    }
-                default:
-                    {
-                        Memory<float> memory = new float[length / sizeof(float)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return F4(memory);
-                    }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        [SkipLocalsInit]
-        static Item DecodeF8(in ReadOnlySequence<byte> bytes)
-        {
-            int length = (int)bytes.Length;
-            switch (length)
-            {
-                case 0:
-                    return F8();
-                case >= 1024:
-                    {
-                        var owner = MemoryOwner<double>.Allocate(length / sizeof(double));
-                        var span = owner.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return F8(owner);
-                    }
-                default:
-                    {
-                        Memory<double> memory = new double[length / sizeof(double)];
-                        var span = memory.Span;
-                        bytes.CopyTo(span.AsBytes());
-                        span.ReverseEndianness();
-                        return F8(memory);
-                    }
-            }
+            var owner = MemoryOwner<T>.Allocate(length / sizeof(T));
+            var span = owner.Span;
+            bytes.CopyTo(span.AsBytes());
+            ReverseEndiannessHelper<T>.Reverse(span);
+            return owner;
         }
 
         [DoesNotReturn]

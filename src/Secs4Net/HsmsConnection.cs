@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.HighPerformance.Buffers;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using PooledAwait;
 using System.Buffers;
@@ -15,7 +14,7 @@ namespace Secs4Net;
 #if NET
 [UnsupportedOSPlatform("browser")]
 #endif
-public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncDisposable
+public sealed class HsmsConnection : ISecsConnection, IAsyncDisposable
 {
     public event EventHandler<ConnectionState>? ConnectionChanged;
     public int T5 { get; }
@@ -196,7 +195,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
                     CommunicationStateChanging(ConnectionState.Connecting);
                     try
                     {
-#if NET6_0
+#if NET
                         _socket = await server.AcceptAsync(cancellation).ConfigureAwait(false);
 #else
                         _socket = await server.AcceptAsync().WithCancellation(cancellation).ConfigureAwait(false);
@@ -246,15 +245,11 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
         _socket = null;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    public void Start(CancellationToken cancellation)
     {
-        _stoppingToken = stoppingToken;
-        Start(_stoppingToken);
-        return Task.CompletedTask;
+        _stoppingToken = cancellation;
+        Task.Run(() => _startImpl(cancellation), cancellation);
     }
-
-    private void Start(CancellationToken cancellation)
-        => Task.Run(() => _startImpl(cancellation), cancellation);
 
     private async Task StartPipeDecoderConsumerAsync(CancellationToken cancellation)
     {
@@ -363,8 +358,10 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
     {
         try
         {
-            await _pipeDecoder.GetControlMessages(cancellation)
-                .ForEachAwaitWithCancellationAsync(ProcessControlMessageAsync, cancellation).ConfigureAwait(false);
+            await foreach (var item in _pipeDecoder.GetControlMessages(cancellation).WithCancellation(cancellation).ConfigureAwait(false))
+            {
+                await ProcessControlMessageAsync(item, cancellation).ConfigureAwait(continueOnCapturedContext: false);
+            }
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
     }
@@ -444,7 +441,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
             _logger.Info("Sent Control Message: " + msgType);
             if (_replyExpectedMsgs.ContainsKey(id))
             {
-#if NET6_0
+#if NET
                 await token.Task.WaitAsync(TimeSpan.FromMilliseconds(T6), cancellation).ConfigureAwait(false);
 #else
                 if (await Task.WhenAny(token.Task, Task.Delay(T6, cancellation)).ConfigureAwait(false) != token.Task)
@@ -455,7 +452,7 @@ public sealed class HsmsConnection : BackgroundService, ISecsConnection, IAsyncD
 #endif
             }
         }
-#if NET6_0
+#if NET
         catch (TimeoutException)
         {
             _logger.Error($"T6 Timeout[id=0x{id:X8}]: {T6 / 1000} sec.");

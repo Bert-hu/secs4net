@@ -5,7 +5,7 @@
 		<Authors>berthu</Authors>
 		<!--<PackageLicenseExpression>MIT</PackageLicenseExpression>-->
 		<Nullable>enable</Nullable>
-		<!--<LangVersion>10.0</LangVersion>-->
+		<LangVersion>12.0</LangVersion>
 		<Deterministic>true</Deterministic>
 		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -14,7 +14,7 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<EnablePackageValidation>true</EnablePackageValidation>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
-		<Copyright>Copyright © secs4net 2023</Copyright>
+		<Copyright>Copyright © secs4net 2024</Copyright>
 		<PackageProjectUrl>https://mkjeff.github.io/secs4net/</PackageProjectUrl>
 	</PropertyGroup>
   <PropertyGroup>

@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CommunityToolkit.HighPerformance.Buffers;
-using Secs4Net.Benchmark;
+using Secs4Net;
 using System;
 using System.IO.Pipelines;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Secs4Net.Benchmarks;
+namespace Benchmarks;
 
 [Config(typeof(BenchmarkConfig))]
 [MemoryDiagnoser]
@@ -35,7 +35,7 @@ public class PipeDecoding
                 U4(MemoryOwner<uint>.Allocate(ItemCount)),
                 F4(MemoryOwner<float>.Allocate(ItemCount)),
                 A(CreateString(ItemCount, Encoding.ASCII)),
-                J(CreateString(ItemCount, Item.Jis8Encoding)),
+                J(CreateString(ItemCount, Item.JIS8Encoding)),
                 F8(MemoryOwner<double>.Allocate(ItemCount)),
                 L(
                     I1(MemoryOwner<sbyte>.Allocate(ItemCount)),
@@ -51,7 +51,7 @@ public class PipeDecoding
                         B(MemoryOwner<byte>.Allocate(ItemCount)),
                         L(
                             A(CreateString(ItemCount, Encoding.ASCII)),
-                            J(CreateString(ItemCount, Item.Jis8Encoding)),
+                            J(CreateString(ItemCount, Item.JIS8Encoding)),
                             Boolean(MemoryOwner<bool>.Allocate(ItemCount)),
                             B(MemoryOwner<byte>.Allocate(ItemCount))),
                         F8(MemoryOwner<double>.Allocate(ItemCount))),
@@ -59,7 +59,7 @@ public class PipeDecoding
                     B(MemoryOwner<byte>.Allocate(ItemCount)),
                     L(
                         A(CreateString(ItemCount, Encoding.ASCII)),
-                        J(CreateString(ItemCount, Item.Jis8Encoding)),
+                        J(CreateString(ItemCount, Item.JIS8Encoding)),
                         Boolean(MemoryOwner<bool>.Allocate(ItemCount)),
                         B(MemoryOwner<byte>.Allocate(ItemCount))),
                     F8(MemoryOwner<double>.Allocate(ItemCount))),

@@ -10,9 +10,9 @@ namespace Secs4Net.Json;
 
 public static class JsonReader
 {
-    public static Item ToItem(this JsonElement jobject)
+    public static Item ToItem(this JsonElement jsonObject)
     {
-        var json = jobject.EnumerateObject().First();
+        var json = jsonObject.EnumerateObject().First();
 #if NET
         var format = Enum.Parse<SecsFormat>(json.Name);
 #else
@@ -198,7 +198,7 @@ public static class JsonReader
         static Item ThrowHelper(SecsFormat format) => throw new ArgumentOutOfRangeException($"Unknown item format: {format}");
     }
 
-    public static List<SecsMessage> ToSecsMessages(this Stream stream)
+    public static IEnumerable<SecsMessage> ToSecsMessages(this Stream stream)
     {
         var options = new JsonSerializerOptions
         {
@@ -206,24 +206,7 @@ public static class JsonReader
                 new ItemJsonConverter()
             }
         };
-        using var jsonStreamReader = new Utf8JsonStreamReader(stream, 4096);
-        jsonStreamReader.Read(); // move to array start
-        jsonStreamReader.Read(); // move to start of the object
 
-        var result = new List<SecsMessage>(capacity: 32);
-        while (jsonStreamReader.TokenType != JsonTokenType.EndArray)
-        {
-            // deserialize object
-            var message = jsonStreamReader.Deserialise<SecsMessage>(options);
-            if (message is not null)
-            {
-                result.Add(message);
-            }
-            // JsonSerializer.Deserialize ends on last token of the object parsed,
-            // move to the first token of next object
-            jsonStreamReader.Read();
-        }
-
-        return result;
+        return JsonSerializer.Deserialize<IEnumerable<SecsMessage>>(stream, options)!;
     }
 }

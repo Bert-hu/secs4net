@@ -1,16 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net6.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net472</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <IsPackable>false</IsPackable>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Secs4Net\Secs.Bert.csproj" />
     <ProjectReference Include="..\..\src\Secs4Net.Sml\Secs.Sml.Bert.csproj" />
   </ItemGroup>
   
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
 </Project>

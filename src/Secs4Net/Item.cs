@@ -7,23 +7,32 @@ namespace Secs4Net;
 
 public abstract partial class Item : IEquatable<Item>, IDisposable
 {
-    public static readonly Encoding Jis8Encoding = Encoding.GetEncoding(50222);
-    private static readonly Item EmptyL = new ListItem(SecsFormat.List, Array.Empty<Item>());
+    private static readonly Item EmptyL = new ListItem(SecsFormat.List, []);
     private static readonly Item EmptyA = new StringItem(SecsFormat.ASCII, string.Empty);
     private static readonly Item EmptyJ = new StringItem(SecsFormat.JIS8, string.Empty);
-    private static readonly Item EmptyBoolean = new MemoryItem<bool>(SecsFormat.Boolean, Array.Empty<bool>());
-    private static readonly Item EmptyBinary = new MemoryItem<byte>(SecsFormat.Binary, Array.Empty<byte>());
-    private static readonly Item EmptyU1 = new MemoryItem<byte>(SecsFormat.U1, Array.Empty<byte>());
-    private static readonly Item EmptyU2 = new MemoryItem<ushort>(SecsFormat.U2, Array.Empty<ushort>());
-    private static readonly Item EmptyU4 = new MemoryItem<uint>(SecsFormat.U4, Array.Empty<uint>());
-    private static readonly Item EmptyU8 = new MemoryItem<ulong>(SecsFormat.U8, Array.Empty<ulong>());
-    private static readonly Item EmptyI1 = new MemoryItem<sbyte>(SecsFormat.I1, Array.Empty<sbyte>());
-    private static readonly Item EmptyI2 = new MemoryItem<short>(SecsFormat.I2, Array.Empty<short>());
-    private static readonly Item EmptyI4 = new MemoryItem<int>(SecsFormat.I4, Array.Empty<int>());
-    private static readonly Item EmptyI8 = new MemoryItem<long>(SecsFormat.I8, Array.Empty<long>());
-    private static readonly Item EmptyF4 = new MemoryItem<float>(SecsFormat.F4, Array.Empty<float>());
-    private static readonly Item EmptyF8 = new MemoryItem<double>(SecsFormat.F8, Array.Empty<double>());
+    private static readonly Item EmptyBoolean = new MemoryItem<bool>(SecsFormat.Boolean);
+    private static readonly Item EmptyBinary = new MemoryItem<byte>(SecsFormat.Binary);
+    private static readonly Item EmptyU1 = new MemoryItem<byte>(SecsFormat.U1);
+    private static readonly Item EmptyU2 = new MemoryItem<ushort>(SecsFormat.U2);
+    private static readonly Item EmptyU4 = new MemoryItem<uint>(SecsFormat.U4);
+    private static readonly Item EmptyU8 = new MemoryItem<ulong>(SecsFormat.U8);
+    private static readonly Item EmptyI1 = new MemoryItem<sbyte>(SecsFormat.I1);
+    private static readonly Item EmptyI2 = new MemoryItem<short>(SecsFormat.I2);
+    private static readonly Item EmptyI4 = new MemoryItem<int>(SecsFormat.I4);
+    private static readonly Item EmptyI8 = new MemoryItem<long>(SecsFormat.I8);
+    private static readonly Item EmptyF4 = new MemoryItem<float>(SecsFormat.F4);
+    private static readonly Item EmptyF8 = new MemoryItem<double>(SecsFormat.F8);
+    public static Encoding JIS8Encoding { get; set; } = Encoding.UTF8;
+
     public SecsFormat Format { get; }
+
+    static Item()
+    {
+        if (!BitConverter.IsLittleEndian)
+        {
+            throw new PlatformNotSupportedException("secs4net is only work on little endian platform.");
+        }
+    }
 
     private protected Item(SecsFormat format)
     {
@@ -47,8 +56,8 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public virtual Item this[int index]
     {
-        get => throw CreateNotSupportException(Format);
-        set => throw CreateNotSupportException(Format);
+        get => throw ThrowNotSupportException(Format);
+        set => throw ThrowNotSupportException(Format);
     }
 
     /// <summary>
@@ -56,7 +65,7 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     /// </summary>
     /// <exception cref="NotSupportedException">When the item's <see cref="Format"/> is not <see cref="SecsFormat.List"/></exception>
     public virtual Item[] Items
-        => throw CreateNotSupportException(Format);
+        => throw ThrowNotSupportException(Format);
 
     /// <summary>
     /// Get the first element of item array value
@@ -65,8 +74,8 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     /// <returns></returns>
     /// <exception cref="IndexOutOfRangeException">When item is empty or data length less than sizeof(<typeparamref name="T"/>)</exception>
     /// <exception cref="NotSupportedException">when the item's <see cref="Format"/> is <see cref="SecsFormat.List"/> or <see cref="SecsFormat.ASCII"/> or <see cref="SecsFormat.JIS8"/></exception>
-    public virtual ref T FirstValue<T>() where T : unmanaged
-        => throw CreateNotSupportException(Format);
+    public virtual ref T FirstValue<T>() where T : unmanaged, IEquatable<T>
+        => throw ThrowNotSupportException(Format);
 
     /// <summary>
     /// Get the first element of item array value
@@ -74,15 +83,15 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="NotSupportedException">when <see cref="Format"/> is <see cref="SecsFormat.List"/> or <see cref="SecsFormat.ASCII"/> or <see cref="SecsFormat.JIS8"/></exception>
-    public virtual T FirstValueOrDefault<T>(T defaultValue = default) where T : unmanaged
-        => throw CreateNotSupportException(Format);
+    public virtual T FirstValueOrDefault<T>(T defaultValue = default) where T : unmanaged, IEquatable<T>
+        => throw ThrowNotSupportException(Format);
 
     /// <summary>
     /// Get item array as <see cref="Memory{T}"/>
     /// </summary>
     /// <exception cref="NotSupportedException">when <see cref="Format"/> is <see cref="SecsFormat.List"/> or <see cref="SecsFormat.ASCII"/> or <see cref="SecsFormat.JIS8"/></exception>
-    public virtual Memory<T> GetMemory<T>() where T : unmanaged
-        => throw CreateNotSupportException(Format);
+    public virtual Memory<T> GetMemory<T>() where T : unmanaged, IEquatable<T>
+        => throw ThrowNotSupportException(Format);
 
     /// <summary>
     /// Get item string value
@@ -90,13 +99,16 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     /// <returns></returns>
     /// <exception cref="NotSupportedException">when the <see cref="Format"/> is not <see cref="SecsFormat.ASCII"/> or <see cref="SecsFormat.JIS8"/></exception>
     public virtual string GetString()
-        => throw CreateNotSupportException(Format);
+        => throw ThrowNotSupportException(Format);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static NotSupportedException CreateNotSupportException(SecsFormat format, [CallerMemberName] string? memberName = null)
+    private static NotSupportedException ThrowNotSupportException(SecsFormat format, [CallerMemberName] string? memberName = null)
         => new($"{memberName} is not supported, since the item's {nameof(Format)} is {format}");
 
-    public virtual void Dispose() { }
+    public virtual void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 
     public static bool operator !=(Item? r1, Item? r2)
         => !(r1 == r2);
@@ -122,14 +134,10 @@ public abstract partial class Item : IEquatable<Item>, IDisposable
     }
 
     [DebuggerDisplay("Encoded Bytes")]
-    private sealed class EncodedByteDebugView
+    private sealed class EncodedByteDebugView(Item item)
     {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly Item _item;
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public byte[] Bytes => _item.GetEncodedBytes();
-
-        public EncodedByteDebugView(Item item) => _item = item;
+        public byte[] Bytes => item.GetEncodedBytes();
     }
 }

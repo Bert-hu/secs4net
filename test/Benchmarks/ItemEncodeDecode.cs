@@ -1,11 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CommunityToolkit.HighPerformance.Buffers;
+using Secs4Net;
 using System;
 using System.Buffers;
 using System.Linq;
 using System.Text;
 
-namespace Secs4Net.Benchmark;
+namespace Benchmarks;
 
 [Config(typeof(BenchmarkConfig))]
 [MemoryDiagnoser(displayGenColumns: false)]
@@ -31,7 +32,7 @@ public class ItemEncodeDecode
             SecsFormat.Binary => B(CreateArray<byte>(Size)),
             SecsFormat.Boolean => Boolean(CreateArray<bool>(Size)),
             SecsFormat.ASCII => A(CreateString(Size, Encoding.ASCII)),
-            SecsFormat.JIS8 => J(CreateString(Size, Item.Jis8Encoding)),
+            SecsFormat.JIS8 => J(CreateString(Size, Item.JIS8Encoding)),
             SecsFormat.I8 => I8(CreateArray<long>(Size)),
             SecsFormat.I1 => I1(CreateArray<sbyte>(Size)),
             SecsFormat.I2 => I2(CreateArray<short>(Size)),

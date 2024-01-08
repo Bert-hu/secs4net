@@ -1,10 +1,11 @@
 ﻿using BenchmarkDotNet.Attributes;
 using CommunityToolkit.HighPerformance.Buffers;
+using Secs4Net;
 using Secs4Net.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace Secs4Net.Benchmark;
+namespace Benchmarks;
 
 [Config(typeof(BenchmarkConfig))]
 [MemoryDiagnoser(displayGenColumns: false)]
@@ -35,7 +36,7 @@ public class JsonSerialization
                  U4(MemoryOwner<uint>.Allocate(ItemCount)),
                  F4(MemoryOwner<float>.Allocate(ItemCount)),
                  A(CreateString(ItemCount, Encoding.ASCII)),
-                 J(CreateString(ItemCount, Item.Jis8Encoding)), //JIS encoding cost more memory in coreclr
+                 J(CreateString(ItemCount, Item.JIS8Encoding)), //JIS encoding cost more memory in coreclr
                  F8(MemoryOwner<double>.Allocate(ItemCount)),
                  L(
                      I1(MemoryOwner<sbyte>.Allocate(ItemCount)),
@@ -51,7 +52,7 @@ public class JsonSerialization
                          B(MemoryOwner<byte>.Allocate(ItemCount)),
                          L(
                              A(CreateString(ItemCount, Encoding.ASCII)),
-                             J(CreateString(ItemCount, Item.Jis8Encoding)),
+                             J(CreateString(ItemCount, Item.JIS8Encoding)),
                              Boolean(MemoryOwner<bool>.Allocate(ItemCount)),
                              B(MemoryOwner<byte>.Allocate(ItemCount))),
                          F8(MemoryOwner<double>.Allocate(ItemCount))),
@@ -59,7 +60,7 @@ public class JsonSerialization
                      B(MemoryOwner<byte>.Allocate(ItemCount)),
                      L(
                          A(CreateString(ItemCount, Encoding.ASCII)),
-                         J(CreateString(ItemCount, Item.Jis8Encoding)),
+                         J(CreateString(ItemCount, Item.JIS8Encoding)),
                          Boolean(MemoryOwner<bool>.Allocate(ItemCount)),
                          B(MemoryOwner<byte>.Allocate(ItemCount))),
                      F8(MemoryOwner<double>.Allocate(ItemCount))),
