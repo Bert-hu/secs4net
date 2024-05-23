@@ -102,7 +102,15 @@ public sealed class PipeDecoder
 #if DEBUG
                 Trace.WriteLine($"Get data message(id:{header.Id:X8}) with total bytes: {messageLength} and decoded directly");
 #endif
-                await dataMessageWriter.WriteAsync((header, rootItem), cancellation).ConfigureAwait(false);
+                //处理不标准的header
+                if (header.MessageType != MessageType.DataMessage)
+                {
+                    await controlMessageWriter.WriteAsync(header, cancellation).ConfigureAwait(false);
+                }
+                else
+                {
+                    await dataMessageWriter.WriteAsync((header, rootItem), cancellation).ConfigureAwait(false);
+                }
                 continue;
             }
 
