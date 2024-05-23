@@ -9,7 +9,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <LangVersion>12.0</LangVersion>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
