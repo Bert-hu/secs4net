@@ -10,7 +10,7 @@ SECS-II/HSMS-SS/GEM implementation on .NET. This library provides an easy way to
 **Getting started**
 
 ## Install Nuget package
-    > dotnet add package Secs4Net
+    > dotnet add package Secs.Bert
 
 ## Configure via .NET dependency injection
 [Sample code reference](https://github.com/mkjeff/secs4net/blob/base/samples/DeviceWorkerService/ServiceProvider.cs)

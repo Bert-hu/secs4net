@@ -320,7 +320,7 @@ public sealed class HsmsConnection : ISecsConnection, IAsyncDisposable
     public void Reconnect()
         => CommunicationStateChanging(ConnectionState.Retry);
 
-    private void CommunicationStateChanging(ConnectionState newState)
+    public void CommunicationStateChanging(ConnectionState newState)
     {
         State = newState;
         ConnectionChanged?.Invoke(this, State);
@@ -343,6 +343,7 @@ public sealed class HsmsConnection : ISecsConnection, IAsyncDisposable
 #endif
                 break;
             case ConnectionState.Retry:
+                //如果收到SeparateRequest，并且断开连接Disposed，可能导致不重连
                 if (IsDisposed || _isretrying)
                 {
                     return;
